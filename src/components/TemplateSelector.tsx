@@ -1,6 +1,19 @@
 import React, { useState, useMemo } from 'react';
 import { CannedTemplate } from '../types';
-import { FileText, Plus, Edit2, Trash2, RotateCcw, Check, Sparkles, BookOpen } from 'lucide-react';
+import {
+  FileText,
+  Plus,
+  Edit2,
+  Trash2,
+  RotateCcw,
+  Check,
+  Sparkles,
+  BookOpen,
+  LayoutGrid,
+  Target,
+  ClipboardList,
+  Clock,
+} from 'lucide-react';
 
 interface TemplateSelectorProps {
   templates: CannedTemplate[];
@@ -143,26 +156,31 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
       <div className="flex items-center gap-1.5 overflow-x-auto pb-2 mb-3 border-b border-slate-100 text-xs">
         {(
           [
-            { key: 'ALL', label: '全部範本' },
-            { key: 'DART', label: 'DART焦點記錄 (臨床首選)' },
-            { key: 'SOAP', label: 'SOAP標準病歷' },
-            { key: 'ROUTINE', label: '交班速記流水' },
-            { key: 'CUSTOM', label: '我的自訂罐頭' },
+            { key: 'ALL', label: '全部範本', icon: LayoutGrid },
+            { key: 'DART', label: 'DART焦點記錄 (臨床首選)', icon: Target },
+            { key: 'SOAP', label: 'SOAP標準病歷', icon: ClipboardList },
+            { key: 'ROUTINE', label: '交班速記流水', icon: Clock },
+            { key: 'CUSTOM', label: '我的自訂罐頭', icon: Sparkles },
           ] as const
-        ).map((tab) => (
-          <button
-            key={tab.key}
-            type="button"
-            onClick={() => setActiveCategory(tab.key)}
-            className={`px-3 py-1.5 rounded-md whitespace-nowrap font-medium transition-colors cursor-pointer ${
-              activeCategory === tab.key
-                ? 'bg-violet-100 text-violet-800 font-semibold'
-                : 'text-slate-600 hover:bg-slate-100'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+        ).map((tab) => {
+          const IconComp = tab.icon;
+          const isActive = activeCategory === tab.key;
+          return (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => setActiveCategory(tab.key)}
+              className={`px-3 py-1.5 rounded-md whitespace-nowrap font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+                isActive
+                  ? 'bg-violet-100 text-violet-800 font-semibold shadow-2xs'
+                  : 'text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <IconComp className={`w-3.5 h-3.5 ${isActive ? 'text-violet-700' : 'text-slate-400'}`} />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Template Grid */}

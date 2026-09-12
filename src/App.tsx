@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   PatientContext,
   VitalSignsData,
@@ -37,10 +37,19 @@ import {
   Cloud,
   CloudOff,
   User,
+  ChevronDown,
+  Clock,
+  Thermometer,
+  Activity,
+  Wind,
+  KeyRound,
+  Building2,
+  CheckCircle2,
+  Users,
 } from 'lucide-react';
 
 export default function App() {
-  const { user, userSettings, isAdmin, updateUserSettings, logout } = useAuth();
+  const { user, userSettings, isAdmin, updateUserSettings, logout, loginWithEmail, registerWithEmail } = useAuth();
   const {
     records: savedRecords,
     templates,
@@ -63,6 +72,48 @@ export default function App() {
     updateUserStatus: handleUpdateUserStatus,
     runDiagnosticPing: handleRunDiagnosticPing,
   } = useFirestoreSync(user, isAdmin);
+
+  // Custom User Menu and Quick Login Dropdowns
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isQuickLoginOpen, setIsQuickLoginOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const quickLoginRef = useRef<HTMLDivElement>(null);
+
+  // Close menus when clicking outside
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+      if (quickLoginRef.current && !quickLoginRef.current.contains(e.target as Node)) {
+        setIsQuickLoginOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, []);
+
+  // Quick 1-Click Nurse Login Helper
+  const handleQuickNurseLogin = async (type: 'nurseA' | 'nurseB') => {
+    const email = type === 'nurseA' ? 'nurse.lin@hospital.tw' : 'nurse.chen@hospital.tw';
+    const pass = 'nurse123456';
+    const name = type === 'nurseA' ? '林雅婷 N2 (MICU)' : '陳冠宇 RN (8B病房)';
+    try {
+      try {
+        await loginWithEmail(email, pass);
+      } catch (loginErr: any) {
+        if (loginErr?.code === 'auth/user-not-found' || loginErr?.code === 'auth/invalid-credential') {
+          await registerWithEmail(email, pass, name);
+        } else {
+          throw loginErr;
+        }
+      }
+      setIsQuickLoginOpen(false);
+    } catch {
+      setIsAuthModalOpen(true);
+      setIsQuickLoginOpen(false);
+    }
+  };
 
   // Settings State
   const activeSettings: UserSettings = useMemo(() => {
@@ -360,30 +411,38 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => applyClinicalCase('routine')}
-                className="px-2 py-0.5 rounded text-[11px] font-medium hover:bg-white hover:shadow-xs transition-colors cursor-pointer text-slate-700"
+                className="px-2 py-0.5 rounded text-[11px] font-medium hover:bg-white hover:shadow-xs transition-colors cursor-pointer text-slate-700 flex items-center gap-1"
+                title="快速套用常規巡房數值與記錄"
               >
-                常規巡房
+                <Clock className="w-3 h-3 text-slate-400" />
+                <span>常規巡房</span>
               </button>
               <button
                 type="button"
                 onClick={() => applyClinicalCase('fever')}
-                className="px-2 py-0.5 rounded text-[11px] font-medium hover:bg-white hover:shadow-xs transition-colors cursor-pointer text-amber-700"
+                className="px-2 py-0.5 rounded text-[11px] font-medium hover:bg-white hover:shadow-xs transition-colors cursor-pointer text-amber-800 flex items-center gap-1"
+                title="快速帶入體溫 38.8℃ 與退燒處置"
               >
-                發燒處置
+                <Thermometer className="w-3 h-3 text-amber-500" />
+                <span>發燒處置</span>
               </button>
               <button
                 type="button"
                 onClick={() => applyClinicalCase('pain')}
-                className="px-2 py-0.5 rounded text-[11px] font-medium hover:bg-white hover:shadow-xs transition-colors cursor-pointer text-rose-700"
+                className="px-2 py-0.5 rounded text-[11px] font-medium hover:bg-white hover:shadow-xs transition-colors cursor-pointer text-rose-800 flex items-center gap-1"
+                title="快速帶入傷口疼痛 NRS 7 分與止痛處置"
               >
-                止痛評估
+                <Activity className="w-3 h-3 text-rose-500" />
+                <span>止痛評估</span>
               </button>
               <button
                 type="button"
                 onClick={() => applyClinicalCase('dyspnea')}
-                className="px-2 py-0.5 rounded text-[11px] font-medium hover:bg-white hover:shadow-xs transition-colors cursor-pointer text-sky-700"
+                className="px-2 py-0.5 rounded text-[11px] font-medium hover:bg-white hover:shadow-xs transition-colors cursor-pointer text-sky-800 flex items-center gap-1"
+                title="快速帶入 SpO2 89% 與氧氣鼻導管給氧處置"
               >
-                呼吸喘給氧
+                <Wind className="w-3 h-3 text-sky-500" />
+                <span>呼吸喘給氧</span>
               </button>
             </div>
 
@@ -430,34 +489,219 @@ export default function App() {
               </span>
             </button>
 
-            {/* Auth Login / Logout Section */}
+            {/* Integrated Login & User Interface */}
             {user ? (
-              <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 py-1 px-2 rounded-lg">
-                <div className="flex items-center gap-1">
-                  <UserCheck className="w-3.5 h-3.5 text-emerald-700" />
-                  <span className="text-xs font-bold text-emerald-900 max-w-[100px] truncate">
-                    {user.displayName || user.email?.split('@')[0]}
-                  </span>
-                </div>
+              <div className="relative" ref={userMenuRef}>
                 <button
                   type="button"
-                  onClick={() => logout()}
-                  className="text-[11px] text-slate-500 hover:text-rose-600 hover:bg-white p-1 rounded transition-colors cursor-pointer"
-                  title="登出帳號"
+                  id="user-profile-menu-button"
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className="flex items-center gap-2 bg-emerald-50/80 hover:bg-emerald-100/70 border border-emerald-200/90 py-1 px-2.5 rounded-lg transition-all cursor-pointer group shadow-2xs"
+                  title="點擊開啟個人檔案與雲端同步選單"
                 >
-                  <LogOut className="w-3.5 h-3.5" />
+                  <div className="relative">
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-teal-600 to-emerald-600 text-white flex items-center justify-center text-[11px] font-bold shadow-2xs">
+                      {(user.displayName || user.email || 'N').slice(0, 1).toUpperCase()}
+                    </div>
+                    <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white animate-pulse" />
+                  </div>
+                  <div className="text-left hidden sm:block">
+                    <div className="text-xs font-bold text-slate-800 group-hover:text-emerald-950 leading-tight flex items-center gap-1">
+                      <span className="max-w-[90px] truncate">{user.displayName || user.email?.split('@')[0]}</span>
+                      {isAdmin && (
+                        <span className="text-[9px] bg-slate-900 text-teal-300 px-1 rounded font-mono">
+                          Admin
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-[10px] text-emerald-700 leading-none">
+                      {activeSettings.unitName || '臨床護理站'}
+                    </div>
+                  </div>
+                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 ml-0.5" />
                 </button>
+
+                {/* Dropdown User Profile & Cloud Control Card */}
+                {isUserMenuOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-200 p-3 z-50 text-xs animate-in fade-in zoom-in-95">
+                    {/* User Card Header */}
+                    <div className="p-3 bg-gradient-to-br from-slate-50 to-teal-50/40 rounded-xl border border-slate-100 mb-2">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center font-bold text-sm shadow-xs">
+                          {(user.displayName || user.email || 'N').slice(0, 1).toUpperCase()}
+                        </div>
+                        <div className="truncate">
+                          <div className="font-bold text-slate-900 text-sm truncate flex items-center gap-1">
+                            <span>{user.displayName || user.email?.split('@')[0]}</span>
+                            {isAdmin && (
+                              <span className="text-[9px] px-1 py-0.2 bg-teal-100 text-teal-800 rounded font-bold">
+                                管理員
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[11px] text-slate-500 truncate">{user.email}</div>
+                          <div className="text-[10px] text-teal-700 font-medium mt-0.5 flex items-center gap-1">
+                            <Building2 className="w-3 h-3 text-teal-600" />
+                            <span>{activeSettings.unitName || '未指定病房單位'}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Cloud Sync Status */}
+                      <div className="mt-2.5 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px]">
+                        <span className="text-slate-600 flex items-center gap-1">
+                          <Cloud className="w-3.5 h-3.5 text-emerald-600" />
+                          Firebase 雲端同步
+                        </span>
+                        <span className="text-emerald-700 font-semibold flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          即時連線中
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Stats summary */}
+                    <div className="grid grid-cols-2 gap-1.5 mb-2 text-center">
+                      <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                        <div className="text-[10px] text-slate-500">已存病歷</div>
+                        <div className="text-sm font-bold text-slate-800">{savedRecords.length} 筆</div>
+                      </div>
+                      <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                        <div className="text-[10px] text-slate-500">可用罐頭</div>
+                        <div className="text-sm font-bold text-teal-700">{templates.length} 組</div>
+                      </div>
+                    </div>
+
+                    {/* Navigation items */}
+                    <div className="space-y-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsSettingsModalOpen(true);
+                          setIsUserMenuOpen(false);
+                        }}
+                        className="w-full text-left p-2 rounded-lg hover:bg-slate-50 text-slate-700 flex items-center gap-2 transition-colors cursor-pointer"
+                      >
+                        <Settings className="w-3.5 h-3.5 text-slate-500" />
+                        <span className="font-medium">設定常規病房與輪班</span>
+                      </button>
+
+                      {isAdmin && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsAdminModalOpen(true);
+                            setIsUserMenuOpen(false);
+                          }}
+                          className="w-full text-left p-2 rounded-lg hover:bg-teal-50 text-teal-800 flex items-center gap-2 transition-colors cursor-pointer"
+                        >
+                          <ShieldCheck className="w-3.5 h-3.5 text-teal-600" />
+                          <span className="font-medium">系統管理員主控台</span>
+                        </button>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsAuthModalOpen(true);
+                          setIsUserMenuOpen(false);
+                        }}
+                        className="w-full text-left p-2 rounded-lg hover:bg-slate-50 text-slate-700 flex items-center gap-2 transition-colors cursor-pointer"
+                      >
+                        <Users className="w-3.5 h-3.5 text-slate-500" />
+                        <span className="font-medium">切換其他同仁帳號</span>
+                      </button>
+
+                      <div className="border-t border-slate-100 my-1"></div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          logout();
+                          setIsUserMenuOpen(false);
+                        }}
+                        className="w-full text-left p-2 rounded-lg hover:bg-rose-50 text-rose-700 flex items-center gap-2 transition-colors cursor-pointer"
+                      >
+                        <LogOut className="w-3.5 h-3.5 text-rose-600" />
+                        <span className="font-bold">安全登出帳號</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
-              <button
-                type="button"
-                id="open-auth-modal-button"
-                onClick={() => setIsAuthModalOpen(true)}
-                className="px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
-              >
-                <LogIn className="w-3.5 h-3.5" />
-                <span>護理師登入 / 雲端同步</span>
-              </button>
+              <div className="flex items-center gap-1.5">
+                {/* Main Login Button */}
+                <button
+                  type="button"
+                  id="open-auth-modal-button"
+                  onClick={() => setIsAuthModalOpen(true)}
+                  className="px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                >
+                  <LogIn className="w-3.5 h-3.5" />
+                  <span>護理同仁登入</span>
+                </button>
+
+                {/* Quick 1-Click Fast Login Dropdown */}
+                <div className="relative" ref={quickLoginRef}>
+                  <button
+                    type="button"
+                    onClick={() => setIsQuickLoginOpen(!isQuickLoginOpen)}
+                    className="px-2 py-1.5 rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 text-xs font-medium flex items-center gap-1 cursor-pointer transition-colors"
+                    title="免打字一鍵速登臨床示範護理師帳號"
+                  >
+                    <Sparkles className="w-3 h-3 text-teal-600" />
+                    <span className="hidden sm:inline">一鍵速登</span>
+                    <ChevronDown className="w-3 h-3 text-teal-600" />
+                  </button>
+
+                  {isQuickLoginOpen && (
+                    <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-200 py-2 z-50 text-xs animate-in fade-in zoom-in-95">
+                      <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                        臨床測試帳號一鍵切換
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleQuickNurseLogin('nurseA')}
+                        className="w-full text-left px-3 py-2 hover:bg-teal-50 flex items-center gap-2.5 text-slate-700 cursor-pointer transition-colors"
+                      >
+                        <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-800 font-bold flex items-center justify-center text-[11px]">
+                          林
+                        </div>
+                        <div>
+                          <div className="font-bold text-slate-800">林雅婷 N2</div>
+                          <div className="text-[10px] text-slate-500">加護病房 (MICU)</div>
+                        </div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleQuickNurseLogin('nurseB')}
+                        className="w-full text-left px-3 py-2 hover:bg-teal-50 flex items-center gap-2.5 text-slate-700 cursor-pointer transition-colors"
+                      >
+                        <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center text-[11px]">
+                          陳
+                        </div>
+                        <div>
+                          <div className="font-bold text-slate-800">陳冠宇 RN</div>
+                          <div className="text-[10px] text-slate-500">8B 綜合病房</div>
+                        </div>
+                      </button>
+                      <div className="border-t border-slate-100 my-1"></div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsAuthModalOpen(true);
+                          setIsQuickLoginOpen(false);
+                        }}
+                        className="w-full text-left px-3 py-1.5 hover:bg-slate-50 text-teal-700 font-medium flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <KeyRound className="w-3.5 h-3.5 text-teal-600" />
+                        <span>自訂帳號登入 / 註冊...</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
 
             {/* Jump to Saved Records */}

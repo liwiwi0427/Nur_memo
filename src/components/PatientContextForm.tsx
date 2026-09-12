@@ -1,6 +1,6 @@
 import React from 'react';
 import { PatientContext, ShiftType, InterventionData } from '../types';
-import { Clock, Calendar, Bed, Pill, Building2, User } from 'lucide-react';
+import { Clock, Calendar, Bed, Pill, Building2, User, Sun, Sunset, Moon } from 'lucide-react';
 
 interface PatientContextFormProps {
   context: PatientContext;
@@ -183,24 +183,29 @@ export const PatientContextForm: React.FC<PatientContextFormProps> = ({
           <div className="grid grid-cols-3 gap-1">
             {(
               [
-                { key: 'day', label: '白班' },
-                { key: 'evening', label: '小夜' },
-                { key: 'night', label: '大夜' },
+                { key: 'day', label: '白班', icon: Sun },
+                { key: 'evening', label: '小夜', icon: Sunset },
+                { key: 'night', label: '大夜', icon: Moon },
               ] as const
-            ).map((s) => (
-              <button
-                key={s.key}
-                type="button"
-                onClick={() => updateCtx('shift', s.key as ShiftType)}
-                className={`py-1 text-xs rounded font-medium transition-colors cursor-pointer text-center ${
-                  context.shift === s.key
-                    ? 'bg-sky-600 text-white shadow-xs font-bold'
-                    : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
-                }`}
-              >
-                {s.label}
-              </button>
-            ))}
+            ).map((s) => {
+              const IconComp = s.icon;
+              const isSelected = context.shift === s.key;
+              return (
+                <button
+                  key={s.key}
+                  type="button"
+                  onClick={() => updateCtx('shift', s.key as ShiftType)}
+                  className={`py-1 text-xs rounded font-medium transition-colors cursor-pointer flex items-center justify-center gap-1 ${
+                    isSelected
+                      ? 'bg-sky-600 text-white shadow-xs font-bold'
+                      : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
+                  }`}
+                >
+                  <IconComp className={`w-3 h-3 ${isSelected ? 'text-sky-100' : 'text-slate-400'}`} />
+                  <span>{s.label}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
