@@ -1,0 +1,85 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile information and hospital ward preference settings",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth user ID" },
+        "email": { "type": "string", "description": "User email address" },
+        "displayName": { "type": "string", "description": "Display name or nurse title" },
+        "unitName": { "type": "string", "description": "Hospital unit / ward name (e.g. 8B 綜合病房)" },
+        "preferredShift": { "type": "string", "description": "Preferred shift (auto, day, evening, night)" },
+        "defaultBedPrefix": { "type": "string", "description": "Default bed code prefix (e.g. 8B-)" },
+        "nurseSignature": { "type": "string", "description": "Nurse signature or staff ID" },
+        "updatedAt": { "type": "string", "description": "ISO timestamp of last update" }
+      },
+      "required": ["uid", "email"]
+    },
+    "UserRecord": {
+      "title": "UserRecord",
+      "description": "Nursing progress note record belonging to a user",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique record ID" },
+        "userId": { "type": "string", "description": "Firebase Auth user ID of the owner" },
+        "bedNumber": { "type": "string", "description": "Bed number or patient ID" },
+        "unitName": { "type": "string", "description": "Ward / unit name" },
+        "date": { "type": "string", "description": "Record date (YYYY-MM-DD)" },
+        "time": { "type": "string", "description": "Record time (HH:mm)" },
+        "shift": { "type": "string", "description": "Shift type (day, evening, night)" },
+        "templateName": { "type": "string", "description": "Name of template used" },
+        "focus": { "type": "string", "description": "Clinical focus category" },
+        "content": { "type": "string", "description": "Full nursing note text" },
+        "vitalSummary": { "type": "string", "description": "Vital signs summary string" },
+        "createdAt": { "type": "string", "description": "ISO timestamp of record creation" },
+        "updatedAt": { "type": "string", "description": "ISO timestamp of last update" }
+      },
+      "required": ["userId", "content", "bedNumber", "date", "time", "shift"]
+    },
+    "UserTemplate": {
+      "title": "UserTemplate",
+      "description": "Custom canned nursing note templates created by the user",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique template ID" },
+        "userId": { "type": "string", "description": "Firebase Auth user ID of creator" },
+        "name": { "type": "string", "description": "Template title" },
+        "category": { "type": "string", "description": "Category (DART, SOAP, ROUTINE, CUSTOM)" },
+        "description": { "type": "string", "description": "Short description of the template" },
+        "templateText": { "type": "string", "description": "Template content with placeholder variables" },
+        "createdAt": { "type": "string", "description": "ISO timestamp" }
+      },
+      "required": ["userId", "name", "category", "templateText"]
+    },
+    "SystemTemplate": {
+      "title": "SystemTemplate",
+      "description": "Global default canned nursing note templates managed by system administrators",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique system template ID" },
+        "name": { "type": "string", "description": "Template title" },
+        "category": { "type": "string", "description": "Category (DART, SOAP, ROUTINE, CUSTOM)" },
+        "description": { "type": "string", "description": "Description of the template" },
+        "templateText": { "type": "string", "description": "Template content with placeholder variables" },
+        "isActive": { "type": "boolean", "description": "Whether template is enabled for nurses" },
+        "isDefault": { "type": "boolean", "description": "True for system default template" },
+        "updatedAt": { "type": "string", "description": "ISO timestamp of last update" },
+        "updatedBy": { "type": "string", "description": "Email or UID of admin who last updated" }
+      },
+      "required": ["id", "name", "category", "templateText"]
+    },
+    "SystemMetric": {
+      "title": "SystemMetric",
+      "description": "Diagnostics and heartbeat ping entries",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Ping ID" },
+        "timestamp": { "type": "string", "description": "ISO timestamp" },
+        "pingMs": { "type": "number", "description": "Round trip latency in milliseconds" },
+        "client": { "type": "string", "description": "Client identifier" }
+      }
+    }
+  },
+  "firestoreRules": "rules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    function isAdmin() {\n      return request.auth != null && (\n        request.auth.token.email == 'lixpang0427@gmail.com' ||\n        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && \n         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')\n      );\n    }\n    match /users/{userId} {\n      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());\n      allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());\n    }\n    match /records/{recordId} {\n      allow read, update, delete: if request.auth != null && ((resource == null || resource.data.userId == request.auth.uid) || isAdmin());\n      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;\n    }\n    match /custom_templates/{templateId} {\n      allow read, update, delete: if request.auth != null && ((resource == null || resource.data.userId == request.auth.uid) || isAdmin());\n      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;\n    }\n    match /system_templates/{templateId} {\n      allow read: if true;\n      allow write: if request.auth != null && isAdmin();\n    }\n    match /system_metrics/{metricId} {\n      allow read, write: if request.auth != null;\n    }\n  }\n}"
+}

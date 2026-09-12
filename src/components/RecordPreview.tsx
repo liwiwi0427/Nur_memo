@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Copy, Check, Save, Download, RotateCcw, Type, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Copy, Check, Save, Download, RotateCcw, Type, CheckCircle2, Cloud } from 'lucide-react';
 import { CannedTemplate, PatientContext, SavedRecord, VitalSignsData } from '../types';
 import { formatVitalSignsSummary } from '../utils/templateReplacer';
+import { useAuth } from '../context/AuthContext';
 
 interface RecordPreviewProps {
   generatedText: string;
@@ -22,6 +23,7 @@ export const RecordPreview: React.FC<RecordPreviewProps> = ({
   onSaveRecord,
   onResetRecord,
 }) => {
+  const { user } = useAuth();
   const [copied, setCopied] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [fontSize, setFontSize] = useState<'normal' | 'large' | 'xlarge'>('normal');
@@ -41,6 +43,7 @@ export const RecordPreview: React.FC<RecordPreviewProps> = ({
     if (!generatedText) return;
     onSaveRecord({
       bedNumber: context.bedNumber || '未設定床號',
+      unitName: context.unitName || '',
       date: context.recordDate,
       time: context.recordTime,
       shift: context.shift,
@@ -148,12 +151,13 @@ export const RecordPreview: React.FC<RecordPreviewProps> = ({
             {savedSuccess ? (
               <>
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                <span>已儲存於本機記錄！</span>
+                <span>{user ? '已同步儲存至 Firebase！' : '已儲存於本機！'}</span>
               </>
             ) : (
               <>
                 <Save className="w-3.5 h-3.5 text-slate-500" />
                 <span>儲存此筆記錄</span>
+                {user && <Cloud className="w-3 h-3 text-teal-600" />}
               </>
             )}
           </button>

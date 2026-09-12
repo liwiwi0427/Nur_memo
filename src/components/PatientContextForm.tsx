@@ -1,6 +1,6 @@
 import React from 'react';
 import { PatientContext, ShiftType, InterventionData } from '../types';
-import { Clock, Calendar, Bed, Pill, Stethoscope, ChevronDown } from 'lucide-react';
+import { Clock, Calendar, Bed, Pill, Building2, User } from 'lucide-react';
 
 interface PatientContextFormProps {
   context: PatientContext;
@@ -9,7 +9,14 @@ interface PatientContextFormProps {
   onInterventionChange: (inter: InterventionData) => void;
 }
 
-const COMMON_ACTIONS: { label: string; text: string; postTime: string; followBT?: string; followPain?: string; followSpO2?: string }[] = [
+const COMMON_ACTIONS: {
+  label: string;
+  text: string;
+  postTime: string;
+  followBT?: string;
+  followPain?: string;
+  followSpO2?: string;
+}[] = [
   {
     label: '常規照護防跌',
     text: '予常規病房巡房，床欄雙側拉起固定，病床調至最低，呼叫鈴置於身旁，衛教下床安全',
@@ -88,8 +95,6 @@ export const PatientContextForm: React.FC<PatientContextFormProps> = ({
     });
   };
 
-  const quickTimes = ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '00:00', '04:00'];
-
   return (
     <div id="patient-context-panel" className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-xs">
       <div className="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b border-slate-100">
@@ -98,8 +103,8 @@ export const PatientContextForm: React.FC<PatientContextFormProps> = ({
             <Clock className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="font-semibold text-slate-800 text-base">記錄時點與臨床處置 (Context & Intervention)</h3>
-            <p className="text-xs text-slate-500">班別、時間、床號及執行之護理措施與追蹤評估</p>
+            <h3 className="font-semibold text-slate-800 text-sm sm:text-base">記錄時點與臨床處置 (Context & Intervention)</h3>
+            <p className="text-xs text-slate-500">班別、單位、時間、床號及執行之護理措施與追蹤評估</p>
           </div>
         </div>
 
@@ -113,8 +118,23 @@ export const PatientContextForm: React.FC<PatientContextFormProps> = ({
         </button>
       </div>
 
-      {/* Row 1: Date, Time, Shift, Bed Number */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+      {/* Row 1: Unit, Date, Time, Shift, Bed Number */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 mb-4">
+        {/* Unit Name */}
+        <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+          <label className="text-xs font-semibold text-slate-600 flex items-center gap-1 mb-1">
+            <Building2 className="w-3 h-3 text-teal-600" />
+            病房 / 單位
+          </label>
+          <input
+            type="text"
+            value={context.unitName}
+            onChange={(e) => updateCtx('unitName', e.target.value)}
+            placeholder="例: 8B 綜合病房"
+            className="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs text-slate-800 font-medium focus:outline-hidden focus:ring-2 focus:ring-sky-200"
+          />
+        </div>
+
         {/* Date */}
         <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
           <label className="text-xs font-semibold text-slate-600 flex items-center gap-1 mb-1">
@@ -163,18 +183,18 @@ export const PatientContextForm: React.FC<PatientContextFormProps> = ({
           <div className="grid grid-cols-3 gap-1">
             {(
               [
-                { key: 'day', label: '白班 (D)' },
-                { key: 'evening', label: '小夜 (E)' },
-                { key: 'night', label: '大夜 (N)' },
+                { key: 'day', label: '白班' },
+                { key: 'evening', label: '小夜' },
+                { key: 'night', label: '大夜' },
               ] as const
             ).map((s) => (
               <button
                 key={s.key}
                 type="button"
                 onClick={() => updateCtx('shift', s.key as ShiftType)}
-                className={`py-1 text-xs rounded font-medium transition-colors cursor-pointer ${
+                className={`py-1 text-xs rounded font-medium transition-colors cursor-pointer text-center ${
                   context.shift === s.key
-                    ? 'bg-sky-600 text-white shadow-xs'
+                    ? 'bg-sky-600 text-white shadow-xs font-bold'
                     : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
                 }`}
               >
@@ -194,7 +214,7 @@ export const PatientContextForm: React.FC<PatientContextFormProps> = ({
             type="text"
             value={context.bedNumber}
             onChange={(e) => updateCtx('bedNumber', e.target.value)}
-            placeholder="例: 12-1 或 A05"
+            placeholder="例: 8B-12"
             className="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs text-slate-800 font-medium focus:outline-hidden focus:ring-2 focus:ring-sky-200"
           />
         </div>
@@ -207,7 +227,7 @@ export const PatientContextForm: React.FC<PatientContextFormProps> = ({
             <Pill className="w-4 h-4 text-emerald-600" />
             <span className="text-xs font-bold text-slate-700">護理處置介入 (Action)</span>
           </div>
-          <span className="text-xs text-slate-600">點擊下方片語可快速代入：</span>
+          <span className="text-[11px] text-slate-500">點擊下方片語可快速帶入處置與追蹤時間：</span>
         </div>
 
         {/* Quick Action Chips */}

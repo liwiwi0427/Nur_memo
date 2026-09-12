@@ -1,6 +1,15 @@
 export type ShiftType = 'day' | 'evening' | 'night';
 
-export type O2DeviceType = 'Room Air' | 'Nasal Cannula' | 'Simple Mask' | 'Venturi Mask' | 'Non-Rebreathing Mask' | 'High Flow (HFNC)' | 'Endotracheal Tube';
+export type UserRole = 'admin' | 'nurse';
+
+export type O2DeviceType =
+  | 'Room Air'
+  | 'Nasal Cannula'
+  | 'Simple Mask'
+  | 'Venturi Mask'
+  | 'Non-Rebreathing Mask'
+  | 'High Flow (HFNC)'
+  | 'Endotracheal Tube';
 
 export interface VitalSignsData {
   bt: string;         // Body Temperature (°C)
@@ -27,12 +36,30 @@ export interface GCSData {
   rightPupilReflex: '+' | '±' | '-';
 }
 
+export type PreferredShiftOption = 'auto' | 'day' | 'evening' | 'night';
+
+export interface UserSettings {
+  uid?: string;
+  email?: string;
+  displayName?: string;
+  unitName: string;                     // e.g. "8B 綜合病房", "ICU", "急診"
+  preferredShift: PreferredShiftOption; // 'auto' (by current time) or fixed 'day' | 'evening' | 'night'
+  defaultBedPrefix: string;             // e.g. "8B-", "12-"
+  nurseSignature: string;               // Optional nurse name / ID
+  role?: UserRole;                      // 'admin' or 'nurse'
+  lastActive?: string;                  // ISO timestamp
+  createdAt?: string;                   // ISO timestamp
+  status?: 'active' | 'suspended';      // account status
+}
+
 export interface PatientContext {
+  unitName: string;   // Ward / Unit (e.g., 8B 綜合病房, ICU, 急診)
   bedNumber: string;
   recordDate: string; // YYYY-MM-DD
   recordTime: string; // HH:mm
   shift: ShiftType;
   chiefComplaint: string;
+  nurseName?: string; // Optional staff signature
 }
 
 export interface InterventionData {
@@ -58,12 +85,18 @@ export interface CannedTemplate {
   description: string;
   templateText: string;
   isDefault?: boolean;
+  isActive?: boolean;
+  userId?: string;
+  updatedAt?: string;
+  updatedBy?: string;
 }
 
 export interface SavedRecord {
   id: string;
+  userId?: string;
   createdAt: string;
   bedNumber: string;
+  unitName?: string;
   date: string;
   time: string;
   shift: ShiftType;
@@ -71,4 +104,17 @@ export interface SavedRecord {
   focus: string;
   content: string;
   vitalSummary: string;
+}
+
+export interface FirebaseUsageStats {
+  recordCount: number;
+  userCount: number;
+  customTemplateCount: number;
+  systemTemplateCount: number;
+  estimatedStorageKb: number;
+  sessionReads: number;
+  sessionWrites: number;
+  lastPingMs: number | null;
+  lastPingTime: string | null;
+  syncHealth: 'healthy' | 'degraded' | 'offline';
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { CannedTemplate } from '../types';
 import { FileText, Plus, Edit2, Trash2, RotateCcw, Check, Sparkles, BookOpen } from 'lucide-react';
 
@@ -47,11 +47,24 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<CannedTemplate | null>(null);
 
+  // Deduplicate incoming templates strictly by ID to prevent duplicate React keys
+  const safeTemplates = useMemo(() => {
+    const map = new Map<string, CannedTemplate>();
+    templates.forEach((t) => {
+      if (t && t.id && !map.has(t.id)) {
+        map.set(t.id, t);
+      }
+    });
+    return Array.from(map.values());
+  }, [templates]);
+
   // Filtered list
-  const filteredTemplates = templates.filter((t) => {
-    if (activeCategory === 'ALL') return true;
-    return t.category === activeCategory;
-  });
+  const filteredTemplates = useMemo(() => {
+    return safeTemplates.filter((t) => {
+      if (activeCategory === 'ALL') return true;
+      return t.category === activeCategory;
+    });
+  }, [safeTemplates, activeCategory]);
 
   const handleOpenNew = () => {
     setEditingTemplate({

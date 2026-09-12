@@ -1,0 +1,48 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.token.email == 'lixpang0427@gmail.com' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      );
+    }
+
+    // User profile and ward preferences
+    match /users/{userId} {
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+    }
+    
+    // User's clinical nursing records - isolated per user, admin can audit/inspect
+    match /records/{recordId} {
+      allow read, update, delete: if request.auth != null && (
+        (resource == null || resource.data.userId == request.auth.uid) || isAdmin()
+      );
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+    
+    // User's custom templates
+    match /custom_templates/{templateId} {
+      allow read, update, delete: if request.auth != null && (
+        (resource == null || resource.data.userId == request.auth.uid) || isAdmin()
+      );
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+
+    // Global default system templates managed by admin
+    match /system_templates/{templateId} {
+      // Anyone can read system default templates
+      allow read: if true;
+      // Only admins can create, update, or delete system default templates
+      allow write: if request.auth != null && isAdmin();
+    }
+
+    // System diagnostics, ping tests, and metrics
+    match /system_metrics/{metricId} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+
