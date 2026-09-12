@@ -14,6 +14,7 @@ import { db } from '../lib/firebase';
 import { SavedRecord, CannedTemplate, UserSettings, FirebaseUsageStats } from '../types';
 import { DEFAULT_TEMPLATES } from '../data/defaultTemplates';
 import { User } from 'firebase/auth';
+import { AppUser } from '../context/AuthContext';
 
 const LOCAL_RECORDS_KEY = 'nursing_app_saved_records';
 const LOCAL_TEMPLATES_KEY = 'nursing_app_custom_templates';
@@ -21,7 +22,10 @@ const LOCAL_SYSTEM_TEMPLATES_KEY = 'nursing_app_system_templates';
 
 const DEFAULT_TEMPLATE_IDS = new Set(DEFAULT_TEMPLATES.map((t) => t.id));
 
-export function useFirestoreSync(user: User | null, isAdmin: boolean = false) {
+export const isLocalUser = (u: (User | AppUser) | null): u is AppUser =>
+  Boolean(u && 'isLocalSession' in u && (u as AppUser).isLocalSession);
+
+export function useFirestoreSync(user: (User | AppUser) | null, isAdmin: boolean = false) {
   const [records, setRecords] = useState<SavedRecord[]>(() => {
     try {
       const saved = localStorage.getItem(LOCAL_RECORDS_KEY);
@@ -132,6 +136,19 @@ export function useFirestoreSync(user: User | null, isAdmin: boolean = false) {
       try {
         const saved = localStorage.getItem(LOCAL_RECORDS_KEY);
         if (saved) setRecords(JSON.parse(saved));
+        const tmpls = localStorage.getItem(LOCAL_TEMPLATES_KEY);
+        if (tmpls) setCustomTemplates(JSON.parse(tmpls));
+      } catch {}
+      return;
+    }
+
+    if (isLocalUser(user)) {
+      setCloudStatus('local');
+      try {
+        const saved = localStorage.getItem(`records_user_${user.uid}`);
+        setRecords(saved ? JSON.parse(saved) : []);
+        const tmpls = localStorage.getItem(`templates_user_${user.uid}`);
+        setCustomTemplates(tmpls ? JSON.parse(tmpls) : []);
       } catch {}
       return;
     }
@@ -158,8 +175,12 @@ export function useFirestoreSync(user: User | null, isAdmin: boolean = false) {
         localStorage.setItem(`records_user_${user.uid}`, JSON.stringify(firestoreList));
       },
       (err) => {
-        console.error('Records snapshot error:', err);
+        console.warn('Records snapshot warning (falling back to local cache):', err);
         setIsSyncing(false);
+        try {
+          const cached = localStorage.getItem(`records_user_${user.uid}`);
+          if (cached) setRecords(JSON.parse(cached));
+        } catch {}
       }
     );
 
@@ -183,7 +204,11 @@ export function useFirestoreSync(user: User | null, isAdmin: boolean = false) {
         setCustomTemplates(userCustom);
       },
       (err) => {
-        console.error('Templates snapshot error:', err);
+        console.warn('Templates snapshot warning (falling back to local cache):', err);
+        try {
+          const cached = localStorage.getItem(`templates_user_${user.uid}`);
+          if (cached) setCustomTemplates(JSON.parse(cached));
+        } catch {}
       }
     );
 
@@ -254,42 +279,50 @@ export function useFirestoreSync(user: User | null, isAdmin: boolean = false) {
       createdAt: new Date().toISOString(),
     };
 
-    if (user) {
+    if (user && !isLocalUser(user)) {
       setIsSyncing(true);
       try {
         await setDoc(doc(db, 'records', recordId), newRecord);
         incWrites();
       } catch (err) {
-        console.error('Failed to save record to Firestore:', err);
+        console.warn('Failed to save record to Firestore, falling back to local storage:', err);
+        const updated = [newRecord, ...records];
+        setRecords(updated);
+        localStorage.setItem(`records_user_${user.uid}`, JSON.stringify(updated));
       } finally {
         setIsSyncing(false);
       }
     } else {
       const updated = [newRecord, ...records];
       setRecords(updated);
-      localStorage.setItem(LOCAL_RECORDS_KEY, JSON.stringify(updated));
+      const storageKey = user?.uid ? `records_user_${user.uid}` : LOCAL_RECORDS_KEY;
+      localStorage.setItem(storageKey, JSON.stringify(updated));
     }
   };
 
   // Delete single record
   const deleteRecord = async (recordId: string) => {
-    if (user) {
+    if (user && !isLocalUser(user)) {
       try {
         await deleteDoc(doc(db, 'records', recordId));
         incWrites();
       } catch (err) {
-        console.error('Failed to delete record in Firestore:', err);
+        console.warn('Failed to delete record in Firestore, falling back to local storage:', err);
+        const updated = records.filter((r) => r.id !== recordId);
+        setRecords(updated);
+        localStorage.setItem(`records_user_${user.uid}`, JSON.stringify(updated));
       }
     } else {
       const updated = records.filter((r) => r.id !== recordId);
       setRecords(updated);
-      localStorage.setItem(LOCAL_RECORDS_KEY, JSON.stringify(updated));
+      const storageKey = user?.uid ? `records_user_${user.uid}` : LOCAL_RECORDS_KEY;
+      localStorage.setItem(storageKey, JSON.stringify(updated));
     }
   };
 
   // Clear all user records
   const clearAllRecords = async () => {
-    if (user) {
+    if (user && !isLocalUser(user)) {
       try {
         const batch = writeBatch(db);
         records.forEach((r) => {
@@ -298,28 +331,41 @@ export function useFirestoreSync(user: User | null, isAdmin: boolean = false) {
         await batch.commit();
         incWrites(records.length);
       } catch (err) {
-        console.error('Failed to clear records in Firestore:', err);
+        console.warn('Failed to clear records in Firestore, falling back to local storage:', err);
+        setRecords([]);
+        localStorage.removeItem(`records_user_${user.uid}`);
       }
     } else {
       setRecords([]);
-      localStorage.removeItem(LOCAL_RECORDS_KEY);
+      const storageKey = user?.uid ? `records_user_${user.uid}` : LOCAL_RECORDS_KEY;
+      localStorage.removeItem(storageKey);
     }
   };
 
   // Save or update custom template (Nurse user)
   const saveCustomTemplate = async (tmpl: CannedTemplate) => {
-    if (user) {
-      const docRef = doc(db, 'custom_templates', tmpl.id);
-      await setDoc(
-        docRef,
-        {
-          ...tmpl,
-          userId: user.uid,
-          createdAt: new Date().toISOString(),
-        },
-        { merge: true }
-      );
-      incWrites();
+    if (user && !isLocalUser(user)) {
+      try {
+        const docRef = doc(db, 'custom_templates', tmpl.id);
+        await setDoc(
+          docRef,
+          {
+            ...tmpl,
+            userId: user.uid,
+            createdAt: new Date().toISOString(),
+          },
+          { merge: true }
+        );
+        incWrites();
+      } catch (e) {
+        console.warn('Failed to save custom template to Firestore, falling back to local storage:', e);
+        const existingIdx = customTemplates.findIndex((t) => t.id === tmpl.id);
+        const updated = existingIdx >= 0
+          ? customTemplates.map((t, idx) => (idx === existingIdx ? tmpl : t))
+          : [tmpl, ...customTemplates];
+        setCustomTemplates(updated);
+        localStorage.setItem(`templates_user_${user.uid}`, JSON.stringify(updated));
+      }
     } else {
       const existingIdx = customTemplates.findIndex((t) => t.id === tmpl.id);
       let updated: CannedTemplate[];
@@ -330,19 +376,28 @@ export function useFirestoreSync(user: User | null, isAdmin: boolean = false) {
         updated = [tmpl, ...customTemplates];
       }
       setCustomTemplates(updated);
-      localStorage.setItem(LOCAL_TEMPLATES_KEY, JSON.stringify(updated));
+      const storageKey = user?.uid ? `templates_user_${user.uid}` : LOCAL_TEMPLATES_KEY;
+      localStorage.setItem(storageKey, JSON.stringify(updated));
     }
   };
 
   // Delete custom template (Nurse user)
   const deleteCustomTemplate = async (templateId: string) => {
-    if (user) {
-      await deleteDoc(doc(db, 'custom_templates', templateId));
-      incWrites();
+    if (user && !isLocalUser(user)) {
+      try {
+        await deleteDoc(doc(db, 'custom_templates', templateId));
+        incWrites();
+      } catch (e) {
+        console.warn('Failed to delete custom template from Firestore, updating local cache:', e);
+        const updated = customTemplates.filter((t) => t.id !== templateId);
+        setCustomTemplates(updated);
+        localStorage.setItem(`templates_user_${user.uid}`, JSON.stringify(updated));
+      }
     } else {
       const updated = customTemplates.filter((t) => t.id !== templateId);
       setCustomTemplates(updated);
-      localStorage.setItem(LOCAL_TEMPLATES_KEY, JSON.stringify(updated));
+      const storageKey = user?.uid ? `templates_user_${user.uid}` : LOCAL_TEMPLATES_KEY;
+      localStorage.setItem(storageKey, JSON.stringify(updated));
     }
   };
 

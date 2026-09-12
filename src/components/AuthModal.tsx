@@ -29,7 +29,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onClose,
   defaultMode = 'login',
 }) => {
-  const { loginWithEmail, registerWithEmail } = useAuth();
+  const { loginWithEmail, registerWithEmail, loginWithGoogle, loginAsLocalNurse } = useAuth();
   const [isRegister, setIsRegister] = useState(defaultMode === 'register');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -38,6 +38,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [errorMsg, setErrorMsg] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successNotice, setSuccessNotice] = useState('');
+  const [isOperationNotAllowed, setIsOperationNotAllowed] = useState(false);
+  const [showFirebaseGuide, setShowFirebaseGuide] = useState(false);
 
   if (!isOpen) return null;
 
@@ -45,6 +47,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     e.preventDefault();
     setErrorMsg('');
     setSuccessNotice('');
+    setIsOperationNotAllowed(false);
 
     if (!email || !password) {
       setErrorMsg('請輸入電子信箱與密碼');
@@ -73,7 +76,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     } catch (err: any) {
       setIsSubmitting(false);
       const code = err?.code || '';
-      if (code === 'auth/user-not-found' || code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
+      if (code === 'auth/operation-not-allowed') {
+        setIsOperationNotAllowed(true);
+        setErrorMsg('Firebase 專案尚未在後台啟用「電子郵件/密碼」驗證服務。');
+      } else if (code === 'auth/user-not-found' || code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
         setErrorMsg('帳號或密碼不正確，若尚未註冊可切換至「註冊新人員帳號」');
       } else if (code === 'auth/email-already-in-use') {
         setErrorMsg('此電子郵件已被註冊，請直接點選切換至「護理同仁登入」');
@@ -89,6 +95,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const handleInstantQuickLogin = async (type: 'nurseA' | 'nurseB' | 'admin') => {
     setErrorMsg('');
     setSuccessNotice('');
+    setIsOperationNotAllowed(false);
     setIsSubmitting(true);
 
     let targetEmail = '';
@@ -119,11 +126,35 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         await loginWithEmail(targetEmail, targetPass);
         setSuccessNotice(`登入成功！歡迎 ${targetName}`);
       } catch (loginErr: any) {
-        // If account does not exist on Firebase yet, auto-register it seamlessly
         const code = loginErr?.code || '';
+        // If operation not allowed, gracefully fall back to local nurse session
+        if (code === 'auth/operation-not-allowed') {
+          loginAsLocalNurse(targetEmail, targetName, type === 'admin' ? 'admin' : 'nurse');
+          setSuccessNotice(`已切換為本機護理人員模式！歡迎 ${targetName}`);
+          setTimeout(() => {
+            setIsSubmitting(false);
+            onClose();
+          }, 600);
+          return;
+        }
+
+        // If account does not exist on Firebase yet, auto-register it seamlessly
         if (code === 'auth/user-not-found' || code === 'auth/invalid-credential') {
-          await registerWithEmail(targetEmail, targetPass, targetName);
-          setSuccessNotice(`首次使用已自動建立帳號並登入！歡迎 ${targetName}`);
+          try {
+            await registerWithEmail(targetEmail, targetPass, targetName);
+            setSuccessNotice(`首次使用已自動建立帳號並登入！歡迎 ${targetName}`);
+          } catch (regErr: any) {
+            if (regErr?.code === 'auth/operation-not-allowed') {
+              loginAsLocalNurse(targetEmail, targetName, type === 'admin' ? 'admin' : 'nurse');
+              setSuccessNotice(`已切換為本機護理人員模式！歡迎 ${targetName}`);
+              setTimeout(() => {
+                setIsSubmitting(false);
+                onClose();
+              }, 600);
+              return;
+            }
+            throw regErr;
+          }
         } else {
           throw loginErr;
         }
@@ -135,7 +166,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       }, 700);
     } catch (err: any) {
       setIsSubmitting(false);
-      setErrorMsg(err.message || '快速登入失敗，請手動輸入帳號密碼');
+      const code = err?.code || '';
+      if (code === 'auth/operation-not-allowed') {
+        setIsOperationNotAllowed(true);
+        setErrorMsg('Firebase 後台尚未啟用「電子郵件/密碼」登入方式。');
+      } else {
+        setErrorMsg(err.message || '快速登入失敗，請手動輸入帳號密碼');
+      }
     }
   };
 
@@ -290,6 +327,60 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
           )}
 
+          {/* Special Friendly Alert for auth/operation-not-allowed */}
+          {isOperationNotAllowed && (
+            <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs space-y-2.5">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-bold text-amber-900">Firebase 後台尚未開啟「電子郵件/密碼」身分驗證</div>
+                  <div className="text-[11px] text-amber-800 mt-0.5 leading-relaxed">
+                    目前 Firebase 雲端專案 (<code className="bg-amber-100/80 px-1 py-0.5 rounded font-mono text-[10px]">nur-memo</code>) 尚未開通 Email 認證，您可以直接透過下方「本機護理師身分」秒速進入使用！
+                  </div>
+                </div>
+              </div>
+
+              {/* Instant Local Fallback Action Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  loginAsLocalNurse(
+                    email || 'nurse.lin@hospital.tw',
+                    displayName || '臨床護理人員 (N2)'
+                  );
+                  onClose();
+                }}
+                className="w-full py-2 px-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer text-xs"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>⚡ 以「本機護理師身分」立即進入使用 (完整功能/免等待)</span>
+              </button>
+
+              {/* Expandable Firebase Console Guide */}
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setShowFirebaseGuide(!showFirebaseGuide)}
+                  className="text-[11px] text-amber-800 hover:text-amber-950 underline font-medium flex items-center gap-1 cursor-pointer"
+                >
+                  <span>{showFirebaseGuide ? '收起後台設定說明 ▲' : '如何至 Firebase Console 開啟？(30秒設定教學) ▼'}</span>
+                </button>
+                {showFirebaseGuide && (
+                  <div className="mt-2 p-2.5 bg-white/90 rounded-lg border border-amber-200/80 text-[11px] text-slate-700 space-y-1">
+                    <p className="font-bold text-slate-800">開啟雲端登入步驟：</p>
+                    <ol className="list-decimal list-inside space-y-1 text-slate-600">
+                      <li>前往 <a href="https://console.firebase.google.com/" target="_blank" rel="noreferrer" className="text-teal-700 underline font-medium">Firebase Console</a></li>
+                      <li>選擇專案 <strong>nur-memo</strong></li>
+                      <li>左側選單點擊 <strong>Authentication (身分驗證)</strong></li>
+                      <li>點選 <strong>Sign-in method (登入方式)</strong> 分頁</li>
+                      <li>點選 <strong>電子郵件/密碼 (Email/Password)</strong>，將開關切換為 <strong>啟用 (Enable)</strong> 並點擊「儲存」</li>
+                    </ol>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {successNotice && (
             <div className="flex items-start gap-2 p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs">
               <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 mt-0.5" />
@@ -379,6 +470,66 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <span>安全登入雲端帳號</span>
               </>
             )}
+          </button>
+
+          {/* Google Sign-in Alternative */}
+          <div className="relative my-2">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-200" />
+            </div>
+            <div className="relative flex justify-center text-xs">
+              <span className="bg-white px-2 text-slate-400 text-[11px]">或以其他方式登入</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={async () => {
+              setErrorMsg('');
+              setIsSubmitting(true);
+              try {
+                await loginWithGoogle();
+                setSuccessNotice('Google 帳號登入成功！');
+                setTimeout(() => {
+                  setIsSubmitting(false);
+                  onClose();
+                }, 700);
+              } catch (googleErr: any) {
+                setIsSubmitting(false);
+                const code = googleErr?.code || '';
+                if (code === 'auth/popup-closed-by-user') {
+                  return;
+                }
+                if (code === 'auth/operation-not-allowed') {
+                  setIsOperationNotAllowed(true);
+                  setErrorMsg('Firebase 後台尚未啟用 Google 登入提供者。');
+                } else {
+                  setErrorMsg(googleErr.message || 'Google 登入失敗');
+                }
+              }
+            }}
+            className="w-full py-2 px-3 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-2xs"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24">
+              <path
+                fill="#4285F4"
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+              />
+              <path
+                fill="#34A853"
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+              />
+              <path
+                fill="#EA4335"
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+              />
+            </svg>
+            <span>使用 Google 帳號快速登入</span>
           </button>
 
           {/* Guest Mode Assurance */}

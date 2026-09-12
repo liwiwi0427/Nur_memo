@@ -88,8 +88,6 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     setTimeout(() => setStatusMessage(null), 3500);
   };
 
-  if (!isOpen) return null;
-
   // Filter templates (strictly deduplicated by template ID)
   const filteredTemplates = useMemo(() => {
     const seen = new Set<string>();
@@ -108,6 +106,8 @@ export const AdminModal: React.FC<AdminModalProps> = ({
       return matchesSearch && matchesCategory && matchesStatus;
     });
   }, [systemTemplates, searchQuery, categoryFilter, statusFilter]);
+
+  if (!isOpen) return null;
 
   const handleStartCreate = () => {
     setIsCreatingTemplate(true);

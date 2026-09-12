@@ -49,7 +49,16 @@ import {
 } from 'lucide-react';
 
 export default function App() {
-  const { user, userSettings, isAdmin, updateUserSettings, logout, loginWithEmail, registerWithEmail } = useAuth();
+  const {
+    user,
+    userSettings,
+    isAdmin,
+    updateUserSettings,
+    logout,
+    loginWithEmail,
+    registerWithEmail,
+    loginAsLocalNurse,
+  } = useAuth();
   const {
     records: savedRecords,
     templates,
@@ -93,7 +102,7 @@ export default function App() {
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, []);
 
-  // Quick 1-Click Nurse Login Helper
+  // Quick 1-Click Nurse Login Helper (with automatic fallback if Firebase Email/Password auth isn't enabled)
   const handleQuickNurseLogin = async (type: 'nurseA' | 'nurseB') => {
     const email = type === 'nurseA' ? 'nurse.lin@hospital.tw' : 'nurse.chen@hospital.tw';
     const pass = 'nurse123456';
@@ -102,16 +111,36 @@ export default function App() {
       try {
         await loginWithEmail(email, pass);
       } catch (loginErr: any) {
-        if (loginErr?.code === 'auth/user-not-found' || loginErr?.code === 'auth/invalid-credential') {
-          await registerWithEmail(email, pass, name);
+        const code = loginErr?.code || '';
+        if (code === 'auth/operation-not-allowed') {
+          loginAsLocalNurse(email, name, 'nurse');
+          setIsQuickLoginOpen(false);
+          return;
+        }
+        if (code === 'auth/user-not-found' || code === 'auth/invalid-credential') {
+          try {
+            await registerWithEmail(email, pass, name);
+          } catch (regErr: any) {
+            if (regErr?.code === 'auth/operation-not-allowed') {
+              loginAsLocalNurse(email, name, 'nurse');
+              setIsQuickLoginOpen(false);
+              return;
+            }
+            throw regErr;
+          }
         } else {
           throw loginErr;
         }
       }
       setIsQuickLoginOpen(false);
-    } catch {
-      setIsAuthModalOpen(true);
-      setIsQuickLoginOpen(false);
+    } catch (err: any) {
+      if (err?.code === 'auth/operation-not-allowed') {
+        loginAsLocalNurse(email, name, 'nurse');
+        setIsQuickLoginOpen(false);
+      } else {
+        setIsAuthModalOpen(true);
+        setIsQuickLoginOpen(false);
+      }
     }
   };
 
