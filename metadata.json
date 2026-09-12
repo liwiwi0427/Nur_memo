@@ -1,0 +1,6 @@
+{
+  "name": "護理記錄快打產生器",
+  "description": "臨床護理記錄速打與罐頭語句套用工具，支援時間日期、生命徵象、GCS昏迷指數、DART焦點記錄與常規病房範本，一鍵套用、編輯、複製與本機儲存。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
