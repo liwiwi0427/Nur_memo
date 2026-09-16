@@ -96,14 +96,14 @@ export const PatientContextForm: React.FC<PatientContextFormProps> = ({
   };
 
   return (
-    <div id="patient-context-panel" className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-xs">
-      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b border-slate-100">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-sky-50 flex items-center justify-center text-sky-600">
+    <div id="patient-context-panel" className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-xs">
+      <div className="flex flex-wrap items-center justify-between gap-2 pb-3.5 mb-4 border-b border-slate-100">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-teal-50 border border-teal-100/80 flex items-center justify-center text-teal-700 font-bold shrink-0">
             <Clock className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="font-semibold text-slate-800 text-sm sm:text-base">記錄時點與臨床處置 (Context & Intervention)</h3>
+            <h3 className="font-bold text-slate-900 text-sm sm:text-base tracking-tight">記錄時點與臨床處置 (Context & Intervention)</h3>
             <p className="text-xs text-slate-500">班別、單位、時間、床號及執行之護理措施與追蹤評估</p>
           </div>
         </div>
@@ -111,19 +111,19 @@ export const PatientContextForm: React.FC<PatientContextFormProps> = ({
         <button
           type="button"
           onClick={setNowTime}
-          className="text-xs px-2.5 py-1 rounded-md bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200 transition-colors flex items-center gap-1 font-medium cursor-pointer"
+          className="text-xs px-3 py-1.5 rounded-xl bg-teal-50 text-teal-800 hover:bg-teal-100 border border-teal-200/80 transition-colors flex items-center gap-1.5 font-semibold cursor-pointer shadow-2xs"
         >
-          <Clock className="w-3 h-3" />
+          <Clock className="w-3.5 h-3.5" />
           帶入現在時間
         </button>
       </div>
 
       {/* Row 1: Unit, Date, Time, Shift, Bed Number */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
         {/* Unit Name */}
-        <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-          <label className="text-xs font-semibold text-slate-600 flex items-center gap-1 mb-1">
-            <Building2 className="w-3 h-3 text-teal-600" />
+        <div className="bg-slate-50/70 p-3 rounded-xl border border-slate-200/70">
+          <label className="text-xs font-semibold text-slate-700 flex items-center gap-1 mb-1.5">
+            <Building2 className="w-3.5 h-3.5 text-teal-600" />
             病房 / 單位
           </label>
           <input
@@ -131,29 +131,29 @@ export const PatientContextForm: React.FC<PatientContextFormProps> = ({
             value={context.unitName}
             onChange={(e) => updateCtx('unitName', e.target.value)}
             placeholder="例: 8B 綜合病房"
-            className="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs text-slate-800 font-medium focus:outline-hidden focus:ring-2 focus:ring-sky-200"
+            className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 font-medium focus:outline-hidden focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
           />
         </div>
 
         {/* Date */}
-        <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-          <label className="text-xs font-semibold text-slate-600 flex items-center gap-1 mb-1">
-            <Calendar className="w-3 h-3 text-slate-500" />
+        <div className="bg-slate-50/70 p-3 rounded-xl border border-slate-200/70">
+          <label className="text-xs font-semibold text-slate-700 flex items-center gap-1 mb-1.5">
+            <Calendar className="w-3.5 h-3.5 text-slate-500" />
             記錄日期
           </label>
           <input
             type="date"
             value={context.recordDate}
             onChange={(e) => updateCtx('recordDate', e.target.value)}
-            className="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs text-slate-800 font-medium focus:outline-hidden focus:ring-2 focus:ring-sky-200"
+            className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 font-medium focus:outline-hidden focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
           />
         </div>
 
         {/* Time */}
-        <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-          <div className="flex items-center justify-between mb-1">
-            <label className="text-xs font-semibold text-slate-600 flex items-center gap-1">
-              <Clock className="w-3 h-3 text-slate-500" />
+        <div className="bg-slate-50/70 p-3 rounded-xl border border-slate-200/70">
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="text-xs font-semibold text-slate-700 flex items-center gap-1">
+              <Clock className="w-3.5 h-3.5 text-slate-500" />
               記錄時間
             </label>
             <div className="flex gap-1 overflow-x-auto">
@@ -162,7 +162,7 @@ export const PatientContextForm: React.FC<PatientContextFormProps> = ({
                   key={t}
                   type="button"
                   onClick={() => updateCtx('recordTime', t)}
-                  className="text-[10px] px-1 bg-slate-200 hover:bg-slate-300 rounded text-slate-700 cursor-pointer"
+                  className="text-[10px] px-1.5 py-0.5 bg-white hover:bg-slate-100 rounded border border-slate-200 text-slate-700 cursor-pointer"
                 >
                   {t}
                 </button>
@@ -173,13 +173,13 @@ export const PatientContextForm: React.FC<PatientContextFormProps> = ({
             type="time"
             value={context.recordTime}
             onChange={(e) => updateCtx('recordTime', e.target.value)}
-            className="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs text-slate-800 font-medium focus:outline-hidden focus:ring-2 focus:ring-sky-200"
+            className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 font-medium focus:outline-hidden focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
           />
         </div>
 
         {/* Shift */}
-        <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-          <label className="text-xs font-semibold text-slate-600 mb-1 block">班別 (Shift)</label>
+        <div className="bg-slate-50/70 p-3 rounded-xl border border-slate-200/70">
+          <label className="text-xs font-semibold text-slate-700 mb-1.5 block">班別 (Shift)</label>
           <div className="grid grid-cols-3 gap-1">
             {(
               [
@@ -195,13 +195,13 @@ export const PatientContextForm: React.FC<PatientContextFormProps> = ({
                   key={s.key}
                   type="button"
                   onClick={() => updateCtx('shift', s.key as ShiftType)}
-                  className={`py-1 text-xs rounded font-medium transition-colors cursor-pointer flex items-center justify-center gap-1 ${
+                  className={`py-1.5 text-xs rounded-lg font-semibold transition-all cursor-pointer flex items-center justify-center gap-1 ${
                     isSelected
-                      ? 'bg-sky-600 text-white shadow-xs font-bold'
-                      : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
+                      ? 'bg-teal-700 text-white shadow-2xs font-bold'
+                      : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/80'
                   }`}
                 >
-                  <IconComp className={`w-3 h-3 ${isSelected ? 'text-sky-100' : 'text-slate-400'}`} />
+                  <IconComp className={`w-3 h-3 ${isSelected ? 'text-teal-100' : 'text-slate-400'}`} />
                   <span>{s.label}</span>
                 </button>
               );
@@ -210,9 +210,9 @@ export const PatientContextForm: React.FC<PatientContextFormProps> = ({
         </div>
 
         {/* Bed Number */}
-        <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-          <label className="text-xs font-semibold text-slate-600 flex items-center gap-1 mb-1">
-            <Bed className="w-3 h-3 text-slate-500" />
+        <div className="bg-slate-50/70 p-3 rounded-xl border border-slate-200/70">
+          <label className="text-xs font-semibold text-slate-700 flex items-center gap-1 mb-1.5">
+            <Bed className="w-3.5 h-3.5 text-slate-500" />
             床號 / 病患代號
           </label>
           <input
@@ -220,19 +220,19 @@ export const PatientContextForm: React.FC<PatientContextFormProps> = ({
             value={context.bedNumber}
             onChange={(e) => updateCtx('bedNumber', e.target.value)}
             placeholder="例: 8B-12"
-            className="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs text-slate-800 font-medium focus:outline-hidden focus:ring-2 focus:ring-sky-200"
+            className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 font-medium focus:outline-hidden focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
           />
         </div>
       </div>
 
       {/* Row 2: Intervention Quick Chips & Custom Input */}
-      <div className="bg-slate-50/70 rounded-lg p-3 border border-slate-100">
-        <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+      <div className="bg-slate-50/60 rounded-xl p-3.5 border border-slate-200/70">
+        <div className="flex items-center justify-between gap-2 mb-2.5 flex-wrap">
           <div className="flex items-center gap-1.5">
             <Pill className="w-4 h-4 text-emerald-600" />
-            <span className="text-xs font-bold text-slate-700">護理處置介入 (Action)</span>
+            <span className="text-xs font-bold text-slate-800">護理處置介入 (Action)</span>
           </div>
-          <span className="text-[11px] text-slate-500">點擊下方片語可快速帶入處置與追蹤時間：</span>
+          <span className="text-[11px] text-slate-500">點擊下方常用片語可快速帶入處置與追蹤時間：</span>
         </div>
 
         {/* Quick Action Chips */}
@@ -248,7 +248,7 @@ export const PatientContextForm: React.FC<PatientContextFormProps> = ({
                 if (item.followPain) updateInter('followUpPain', item.followPain);
                 if (item.followSpO2) updateInter('followUpSpO2', item.followSpO2);
               }}
-              className="text-xs px-2 py-1 rounded bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200 hover:border-emerald-300 transition-colors cursor-pointer"
+              className="text-xs px-2.5 py-1 rounded-lg bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200/80 hover:border-emerald-300 transition-all cursor-pointer shadow-2xs font-medium"
             >
               + {item.label}
             </button>
@@ -262,14 +262,14 @@ export const PatientContextForm: React.FC<PatientContextFormProps> = ({
             value={intervention.actionDetail}
             onChange={(e) => updateInter('actionDetail', e.target.value)}
             placeholder="詳細處置內容 (例: 依醫囑給予降溫藥物、提供冰枕、衛教防跌...)"
-            className="w-full bg-white border border-slate-200 rounded-md p-2 text-xs text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-sky-200 leading-relaxed"
+            className="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-xs text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 leading-relaxed"
           />
         </div>
 
         {/* Follow-up / Response Sub-Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-200">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2.5 border-t border-slate-200/70">
           <div>
-            <label className="text-[11px] font-semibold text-slate-600 block mb-0.5">
+            <label className="text-[11px] font-semibold text-slate-600 block mb-1">
               追蹤評估時間
             </label>
             <input
@@ -277,11 +277,11 @@ export const PatientContextForm: React.FC<PatientContextFormProps> = ({
               value={intervention.followUpTime}
               onChange={(e) => updateInter('followUpTime', e.target.value)}
               placeholder="例: 1小時後"
-              className="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs text-slate-700"
+              className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs text-slate-700"
             />
           </div>
           <div>
-            <label className="text-[11px] font-semibold text-slate-600 block mb-0.5">
+            <label className="text-[11px] font-semibold text-slate-600 block mb-1">
               追蹤體溫 (°C)
             </label>
             <input
@@ -289,11 +289,11 @@ export const PatientContextForm: React.FC<PatientContextFormProps> = ({
               value={intervention.followUpBT}
               onChange={(e) => updateInter('followUpBT', e.target.value)}
               placeholder="例: 37.1"
-              className="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs text-slate-700"
+              className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs text-slate-700"
             />
           </div>
           <div>
-            <label className="text-[11px] font-semibold text-slate-600 block mb-0.5">
+            <label className="text-[11px] font-semibold text-slate-600 block mb-1">
               追蹤疼痛評分 (NRS)
             </label>
             <input
@@ -301,11 +301,11 @@ export const PatientContextForm: React.FC<PatientContextFormProps> = ({
               value={intervention.followUpPain}
               onChange={(e) => updateInter('followUpPain', e.target.value)}
               placeholder="例: 1"
-              className="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs text-slate-700"
+              className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs text-slate-700"
             />
           </div>
           <div>
-            <label className="text-[11px] font-semibold text-slate-600 block mb-0.5">
+            <label className="text-[11px] font-semibold text-slate-600 block mb-1">
               追蹤血氧 SpO2 (%)
             </label>
             <input
@@ -313,7 +313,7 @@ export const PatientContextForm: React.FC<PatientContextFormProps> = ({
               value={intervention.followUpSpO2}
               onChange={(e) => updateInter('followUpSpO2', e.target.value)}
               placeholder="例: 98"
-              className="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs text-slate-700"
+              className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs text-slate-700"
             />
           </div>
         </div>

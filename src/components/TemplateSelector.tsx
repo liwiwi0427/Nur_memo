@@ -118,16 +118,16 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
   };
 
   return (
-    <div id="template-library-section" className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-xs">
+    <div id="template-library-section" className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-xs">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 mb-3 border-b border-slate-100">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center text-violet-600">
+      <div className="flex flex-wrap items-center justify-between gap-2 pb-3.5 mb-3 border-b border-slate-100">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-teal-50 border border-teal-100/80 flex items-center justify-center text-teal-700 font-bold shrink-0">
             <BookOpen className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="font-semibold text-slate-800 text-base">護理記錄罐頭語句庫 (Template Library)</h3>
-            <p className="text-xs text-slate-500">選擇臨床記錄範本，可即時替換時間、生命徵象與處置</p>
+            <h3 className="font-bold text-slate-900 text-sm sm:text-base tracking-tight">護理記錄罐頭範本庫 (Template Library)</h3>
+            <p className="text-xs text-slate-500">點選快速帶入臨床 DART / SOAP 範本，自動替換動態標籤</p>
           </div>
         </div>
 
@@ -136,17 +136,17 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
             <button
               type="button"
               onClick={onOpenHelpGuide}
-              className="text-xs px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium flex items-center gap-1 transition-colors cursor-pointer"
+              className="text-xs px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
               title="查看罐頭設定說明與動態變數標籤教學"
             >
               <HelpCircle className="w-3.5 h-3.5 text-teal-600" />
-              <span className="hidden sm:inline">設定說明</span>
+              <span className="hidden sm:inline">變數說明</span>
             </button>
           )}
           <button
             type="button"
             onClick={handleOpenNew}
-            className="text-xs px-2.5 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-medium flex items-center gap-1 shadow-xs transition-colors cursor-pointer"
+            className="text-xs px-3 py-1.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-semibold flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
             新增自訂罐頭
@@ -159,7 +159,7 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
               }
             }}
             title="重設預設範本"
-            className="text-xs p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors cursor-pointer"
+            className="text-xs p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer border border-transparent hover:border-slate-200"
           >
             <RotateCcw className="w-4 h-4" />
           </button>
@@ -171,10 +171,10 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
         {(
           [
             { key: 'ALL', label: '全部範本', icon: LayoutGrid },
-            { key: 'DART', label: 'DART焦點記錄 (臨床首選)', icon: Target },
-            { key: 'SOAP', label: 'SOAP標準病歷', icon: ClipboardList },
+            { key: 'DART', label: 'DART 焦點記錄', icon: Target },
+            { key: 'SOAP', label: 'SOAP 記錄', icon: ClipboardList },
             { key: 'ROUTINE', label: '交班速記流水', icon: Clock },
-            { key: 'CUSTOM', label: '我的自訂罐頭', icon: Sparkles },
+            { key: 'CUSTOM', label: '自訂範本', icon: Sparkles },
           ] as const
         ).map((tab) => {
           const IconComp = tab.icon;
@@ -184,13 +184,13 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
               key={tab.key}
               type="button"
               onClick={() => setActiveCategory(tab.key)}
-              className={`px-3 py-1.5 rounded-md whitespace-nowrap font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-xl whitespace-nowrap font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
                 isActive
-                  ? 'bg-violet-100 text-violet-800 font-semibold shadow-2xs'
-                  : 'text-slate-600 hover:bg-slate-100'
+                  ? 'bg-teal-700 text-white shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-transparent'
               }`}
             >
-              <IconComp className={`w-3.5 h-3.5 ${isActive ? 'text-violet-700' : 'text-slate-400'}`} />
+              <IconComp className={`w-3.5 h-3.5 ${isActive ? 'text-teal-100' : 'text-slate-400'}`} />
               <span>{tab.label}</span>
             </button>
           );
@@ -205,17 +205,17 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
             <div
               key={t.id}
               onClick={() => onSelectTemplate(t)}
-              className={`text-left p-3 rounded-lg border transition-all cursor-pointer relative group flex flex-col justify-between ${
+              className={`text-left p-3.5 rounded-xl border transition-all cursor-pointer relative group flex flex-col justify-between ${
                 isSelected
-                  ? 'border-violet-500 bg-violet-50/50 shadow-xs ring-1 ring-violet-400'
-                  : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50/70 bg-white'
+                  ? 'border-teal-600 bg-teal-50/40 shadow-xs ring-1 ring-teal-500'
+                  : 'border-slate-200 hover:border-teal-300 hover:bg-slate-50/70 bg-white'
               }`}
             >
               <div>
-                <div className="flex items-start justify-between gap-1 mb-1">
+                <div className="flex items-start justify-between gap-1 mb-1.5">
                   <div className="flex items-center gap-1.5">
                     <span
-                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${
                         t.category === 'DART'
                           ? 'bg-teal-100 text-teal-800'
                           : t.category === 'SOAP'
@@ -230,17 +230,17 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                     <h4 className="text-xs font-bold text-slate-800 line-clamp-1">{t.name}</h4>
                   </div>
                   {isSelected && (
-                    <span className="w-4 h-4 rounded-full bg-violet-600 text-white flex items-center justify-center shrink-0">
+                    <span className="w-4 h-4 rounded-full bg-teal-700 text-white flex items-center justify-center shrink-0">
                       <Check className="w-2.5 h-2.5" />
                     </span>
                   )}
                 </div>
-                <p className="text-[11px] text-slate-500 line-clamp-2 mb-2 leading-relaxed">
+                <p className="text-[11px] text-slate-500 line-clamp-2 mb-2.5 leading-relaxed">
                   {t.description || '點選套用此罐頭語句'}
                 </p>
               </div>
 
-              <div className="flex items-center justify-between pt-1 border-t border-slate-100/80 text-[10px] text-slate-400">
+              <div className="flex items-center justify-between pt-1.5 border-t border-slate-100/80 text-[10px] text-slate-400">
                 <span className="truncate max-w-[150px]">
                   {t.isDefault ? '臨床內建標準' : '使用者自訂'}
                 </span>
