@@ -13,6 +13,7 @@ import {
   Target,
   ClipboardList,
   Clock,
+  HelpCircle,
 } from 'lucide-react';
 
 interface TemplateSelectorProps {
@@ -22,6 +23,7 @@ interface TemplateSelectorProps {
   onSaveCustomTemplate: (template: CannedTemplate) => void;
   onDeleteCustomTemplate: (id: string) => void;
   onResetDefaults: () => void;
+  onOpenHelpGuide?: () => void;
 }
 
 const AVAILABLE_TAGS = [
@@ -55,6 +57,7 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
   onSaveCustomTemplate,
   onDeleteCustomTemplate,
   onResetDefaults,
+  onOpenHelpGuide,
 }) => {
   const [activeCategory, setActiveCategory] = useState<'ALL' | 'DART' | 'SOAP' | 'ROUTINE' | 'CUSTOM'>('ALL');
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -128,7 +131,18 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          {onOpenHelpGuide && (
+            <button
+              type="button"
+              onClick={onOpenHelpGuide}
+              className="text-xs px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium flex items-center gap-1 transition-colors cursor-pointer"
+              title="查看罐頭設定說明與動態變數標籤教學"
+            >
+              <HelpCircle className="w-3.5 h-3.5 text-teal-600" />
+              <span className="hidden sm:inline">設定說明</span>
+            </button>
+          )}
           <button
             type="button"
             onClick={handleOpenNew}
