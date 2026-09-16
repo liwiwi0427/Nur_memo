@@ -1,0 +1,22 @@
+{
+  "short_name": "DITTO 4U",
+  "name": "DITTO 4U - 護理記錄快打產生器",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "64x64",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#f8fafc",
+  "theme_color": "#0f766e",
+  "display": "standalone"
+}

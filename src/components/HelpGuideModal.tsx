@@ -49,7 +49,7 @@ export const HelpGuideModal: React.FC<HelpGuideModalProps> = ({
             </div>
             <div>
               <h3 id="help-guide-title" className="font-bold text-base sm:text-lg tracking-tight">
-                護理記錄快打產生器 — 系統使用說明
+                DITTO 4U — 系統使用說明
               </h3>
               <p className="text-xs text-teal-200/90">
                 如何快速產出記錄、自訂焦點片語、活用變數代碼與 HIS 貼上技巧
@@ -419,7 +419,7 @@ export const HelpGuideModal: React.FC<HelpGuideModalProps> = ({
         <div className="px-5 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
           <span className="text-[11px] text-slate-500 flex items-center gap-1">
             <Shield className="w-3.5 h-3.5 text-teal-600" />
-            護理記錄快打產生器 v2.4 · 臨床專業輔助系統
+            DITTO 4U v2.4 · 臨床專業護理快打系統
           </span>
           <button
             type="button"

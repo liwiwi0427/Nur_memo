@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BookOpen, X, HelpCircle, Check, Sparkles } from 'lucide-react';
+import { BookOpen, X, HelpCircle, Check, Sparkles, Activity, FileText, Stethoscope, Languages } from 'lucide-react';
 
 interface ClinicalReferenceModalProps {
   isOpen: boolean;
@@ -38,25 +38,30 @@ export const ClinicalReferenceModal: React.FC<ClinicalReferenceModalProps> = ({ 
         <div className="flex border-b border-slate-100 px-4 pt-2 gap-2 text-xs font-semibold overflow-x-auto">
           {(
             [
-              { key: 'GCS', label: 'GCS 昏迷評分標竿' },
-              { key: 'VS', label: '生命徵象與危急值' },
-              { key: 'DART', label: 'DART焦點記錄規範' },
-              { key: 'ABBR', label: '常用醫護英文縮寫' },
+              { key: 'GCS', label: 'GCS 昏迷評分標竿', icon: Stethoscope },
+              { key: 'VS', label: '生命徵象與危急值', icon: Activity },
+              { key: 'DART', label: 'DART焦點記錄規範', icon: FileText },
+              { key: 'ABBR', label: '常用醫護英文縮寫', icon: Languages },
             ] as const
-          ).map((t) => (
-            <button
-              key={t.key}
-              type="button"
-              onClick={() => setTab(t.key)}
-              className={`pb-2.5 px-2 border-b-2 transition-colors cursor-pointer whitespace-nowrap ${
-                tab === t.key
-                  ? 'border-teal-600 text-teal-700'
-                  : 'border-transparent text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
+          ).map((t) => {
+            const Icon = t.icon;
+            const isActive = tab === t.key;
+            return (
+              <button
+                key={t.key}
+                type="button"
+                onClick={() => setTab(t.key)}
+                className={`pb-2.5 px-2.5 border-b-2 transition-colors cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                  isActive
+                    ? 'border-teal-600 text-teal-700 font-bold'
+                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-teal-600' : 'text-slate-400'}`} />
+                <span>{t.label}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Tab Content */}

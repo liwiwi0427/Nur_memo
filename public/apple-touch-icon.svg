@@ -1,0 +1,66 @@
+<!-- 護理記錄快打產生器 - SVG 向量圖示模組 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192" fill="none">
+  <defs>
+    <linearGradient id="pwaBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f766e" />
+      <stop offset="60%" stop-color="#0d9488" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+
+    <linearGradient id="pwaPaper" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f8fafc" />
+    </linearGradient>
+
+    <linearGradient id="pwaCross" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ef4444" />
+      <stop offset="100%" stop-color="#b91c1c" />
+    </linearGradient>
+
+    <linearGradient id="clipGrad192" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc" />
+      <stop offset="100%" stop-color="#cbd5e1" />
+    </linearGradient>
+
+    <filter id="pwaShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#042f2e" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Main Background Container -->
+  <rect x="10" y="10" width="172" height="172" rx="44" fill="url(#pwaBg)" filter="url(#pwaShadow)" />
+  <rect x="11" y="11" width="170" height="170" rx="43" stroke="#99f6e4" stroke-opacity="0.35" stroke-width="2" />
+
+  <!-- Clipboard Board Body -->
+  <rect x="36" y="44" width="120" height="122" rx="18" fill="#134e4a" />
+
+  <!-- White Paper Form -->
+  <rect x="42" y="48" width="108" height="112" rx="14" fill="url(#pwaPaper)" />
+
+  <!-- Top Clip Hardware -->
+  <rect x="66" y="28" width="60" height="28" rx="10" fill="url(#clipGrad192)" stroke="#0f766e" stroke-width="3" />
+  <circle cx="96" cy="42" r="5.5" fill="#0f766e" />
+
+  <!-- Red Cross Badge -->
+  <g transform="translate(108, 58)">
+    <circle cx="20" cy="20" r="18" fill="#fee2e2" />
+    <rect x="16.5" y="8" width="7" height="24" rx="2.5" fill="url(#pwaCross)" />
+    <rect x="8" y="16.5" width="24" height="7" rx="2.5" fill="url(#pwaCross)" />
+  </g>
+
+  <!-- Nurse Heading / Record Header Lines -->
+  <rect x="54" y="66" width="46" height="6.5" rx="3.25" fill="#0f766e" />
+  <rect x="54" y="78" width="34" height="5" rx="2.5" fill="#94a3b8" />
+
+  <!-- Dynamic ECG / Vital Signs Pulse Rhythm -->
+  <path d="M52 108 L68 108 L76 94 L86 126 L96 98 L104 114 L112 108 L138 108" 
+        stroke="#0d9488" 
+        stroke-width="7" 
+        stroke-linecap="round" 
+        stroke-linejoin="round" 
+        fill="none" />
+
+  <!-- DART Checklist items -->
+  <circle cx="58" cy="136" r="4" fill="#14b8a6" />
+  <rect x="68" y="133.5" width="60" height="5" rx="2.5" fill="#cbd5e1" />
+</svg>

@@ -1,34 +1,68 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
   <defs>
-    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+    <!-- Background Gradient: Rich clinical teal to emerald -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#0f766e" />
-      <stop offset="50%" stop-color="#0d9488" />
-      <stop offset="100%" stop-color="#059669" />
+      <stop offset="100%" stop-color="#0d9488" />
     </linearGradient>
-    <linearGradient id="cross-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#14b8a6" />
-      <stop offset="100%" stop-color="#10b981" />
+
+    <!-- Paper Gradient -->
+    <linearGradient id="paperGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f8fafc" />
     </linearGradient>
-    <filter id="shadow" x="-10%" y="-10%" width="120%" height="125%" filterUnits="userSpaceOnUse">
-      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.2"/>
+
+    <!-- Red / Coral Cross Gradient for unmistakable medical recognition -->
+    <linearGradient id="medCross" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ef4444" />
+      <stop offset="100%" stop-color="#dc2626" />
+    </linearGradient>
+
+    <!-- Clip Gradient -->
+    <linearGradient id="clipGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f1f5f9" />
+      <stop offset="100%" stop-color="#cbd5e1" />
+    </linearGradient>
+
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#042f2e" flood-opacity="0.3"/>
     </filter>
   </defs>
 
-  <!-- Background Shield/Rounded Card -->
-  <rect x="4" y="4" width="56" height="56" rx="14" fill="url(#bg-gradient)" filter="url(#shadow)" />
+  <!-- App Rounded Base Shield -->
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#bgGrad)" filter="url(#cardShadow)" />
+  <rect x="2.5" y="2.5" width="59" height="59" rx="15.5" stroke="#5eead4" stroke-opacity="0.3" stroke-width="1" />
 
-  <!-- Clipboard outline / medical chart -->
-  <rect x="14" y="16" width="36" height="40" rx="6" fill="#ffffff" />
+  <!-- Clipboard Board Body -->
+  <rect x="11" y="13" width="42" height="44" rx="7" fill="#134e4a" />
   
-  <!-- Clipboard top clip -->
-  <rect x="23" y="11" width="18" height="9" rx="3.5" fill="#e2e8f0" stroke="#0f766e" stroke-width="1.5" />
-  <circle cx="32" cy="15.5" r="2" fill="#0f766e" />
+  <!-- Clipboard Paper Sheet -->
+  <rect x="13" y="15" width="38" height="40" rx="5" fill="url(#paperGrad)" />
 
-  <!-- Medical Cross on chart -->
-  <rect x="29" y="24" width="6" height="14" rx="2" fill="url(#cross-gradient)" />
-  <rect x="25" y="28" width="14" height="6" rx="2" fill="url(#cross-gradient)" />
+  <!-- Clipboard Metallic Top Clamp -->
+  <rect x="21" y="8" width="22" height="10" rx="4" fill="url(#clipGrad)" stroke="#0f766e" stroke-width="1.5" />
+  <circle cx="32" cy="13" r="2.2" fill="#0f766e" />
 
-  <!-- Nursing Record Pulse / Notes lines -->
-  <path d="M19 44 L25 44 L28 40 L31 48 L34 42 L37 44 L45 44" stroke="#0d9488" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-  <rect x="20" y="50" width="24" height="2" rx="1" fill="#cbd5e1" />
+  <!-- Red Cross Medical Badge (Top Right of Chart) -->
+  <g transform="translate(35, 19)">
+    <circle cx="9" cy="9" r="8" fill="#fee2e2" />
+    <rect x="7.5" y="3.5" width="3" height="11" rx="1" fill="url(#medCross)" />
+    <rect x="3.5" y="7.5" width="11" height="3" rx="1" fill="url(#medCross)" />
+  </g>
+
+  <!-- Nursing Chart DART Lines (Left Side) -->
+  <rect x="17" y="22" width="14" height="2.5" rx="1.25" fill="#0f766e" />
+  <rect x="17" y="27" width="10" height="2" rx="1" fill="#94a3b8" />
+
+  <!-- Vital Sign ECG / Heartbeat Rhythm Pulse Line (Crisp and Vibrant) -->
+  <path d="M16 38 L22 38 L25 33 L29 45 L33 35 L36 41 L39 38 L48 38" 
+        stroke="#0d9488" 
+        stroke-width="3" 
+        stroke-linecap="round" 
+        stroke-linejoin="round" 
+        fill="none" />
+
+  <!-- Bottom Checklist / Notes Bullet Lines -->
+  <circle cx="19" cy="48" r="1.5" fill="#14b8a6" />
+  <rect x="23" y="47" width="21" height="2" rx="1" fill="#cbd5e1" />
 </svg>

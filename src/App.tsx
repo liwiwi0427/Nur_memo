@@ -412,8 +412,11 @@ export default function App() {
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight flex items-center gap-1.5">
-                  護理記錄快打產生器
+                <h1 className="text-base sm:text-lg font-black text-slate-900 tracking-tight flex items-center gap-1.5">
+                  <span>DITTO 4U</span>
+                  <span className="text-xs font-semibold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md border border-teal-200">
+                    護理記錄快打
+                  </span>
                 </h1>
                 
                 {/* Cloud / Local status badge (Interactive) */}
@@ -953,8 +956,8 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-1.5">
             <Hospital className="w-3.5 h-3.5 text-teal-600" />
-            <span className="font-semibold text-slate-700">護理記錄快打產生器</span>
-            <span>- 臨床輔助工具，專供病房、ICU、門急診快速書寫代入</span>
+            <span className="font-bold text-slate-800">DITTO 4U</span>
+            <span>- 臨床護理記錄快打產生器，專供病房、ICU、門急診快速書寫代入</span>
           </div>
           <div className="text-slate-600 flex items-center gap-2">
             {user ? (
